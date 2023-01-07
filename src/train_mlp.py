@@ -22,12 +22,12 @@ def add_args() -> argparse.Namespace:
                         help="set the seed.")
     parser.add_argument("--save_root", default="../outs/tmp/", type=str,
                         help='the path of saving results.')
-    parser.add_argument("--model", default="mlp", type=str,
-                        help='the model name.')
     parser.add_argument("--method", default="bootstrap", type=str,
                         help='the evaluation method.')
     parser.add_argument("-k", "--n_splits", default=5, type=int,
                         help='the number of splits.')
+    parser.add_argument("--hidden_size", default=[100, 100], type=int, nargs="+",
+                        help='the number of hidden units.')
     parser.add_argument("-p", "--predict", action="store_true",
                         help='if True, predict the test data.')
     args = parser.parse_args()
@@ -38,7 +38,7 @@ def add_args() -> argparse.Namespace:
     # set the save_path
     exp_name = "-".join([get_datetime(),
                          f"seed{args.seed}",
-                         f"{args.model}",
+                         f"mlp",
                          f"{args.method}",
                          f"n_splits{args.n_splits}",])
     args.save_path = os.path.join(args.save_root, exp_name)
@@ -86,7 +86,7 @@ def main():
             split["X_train"], split["y_train"], split["X_val"], split["y_val"]
 
         # init the model
-        model = ModelUtils.auto(args.model)
+        model = ModelUtils.auto("mlp", hidden_layer_sizes=args.hidden_size)
         # train the model
         model = ModelUtils.train(model, X_train_split, y_train_split)
 
