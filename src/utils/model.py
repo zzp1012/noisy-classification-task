@@ -21,7 +21,7 @@ class ModelUtils:
             return MLPClassifier(**kwargs)
         elif model_name == "svm":
             from sklearn.svm import SVC
-            return SVC(**kwargs)
+            return SVC(probability=True, **kwargs)
         elif model_name == "knn":
             from sklearn.neighbors import KNeighborsClassifier
             return KNeighborsClassifier(**kwargs)
@@ -95,6 +95,7 @@ class ModelUtils:
             "y should be 1D and the length equals to X."
 
         y_prob = model.predict_proba(X) # (N, C)
+        y_prob = np.clip(y_prob, 1e-15, 1 - 1e-15) # avoid log(0)
         
         # calculate the loss
         loss = 0
