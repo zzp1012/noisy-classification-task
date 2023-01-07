@@ -107,7 +107,7 @@ def main():
     if args.predict:
         logger.info("#########predicting test data....")
         # init the model
-        model = ModelUtils.auto(args.model)
+        model = ModelUtils.auto("mlp", hidden_layer_sizes=args.hidden_size)
         # train the model
         model = ModelUtils.train(model, X_train, y_train)
 
