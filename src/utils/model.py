@@ -73,44 +73,35 @@ class ModelUtils:
         return y_pred
 
     @classmethod
-    def predict_proba(cls,
+    def cross_entropy(cls,
                       model: BaseEstimator,
-                      X: np.ndarray) -> np.ndarray:
-        """Predict the probabilities of labels.
+                      X: np.ndarray,
+                      y: np.ndarray,) -> float:
+        """Calculate the cross entropy.
         
         Args:
             model (BaseEstimator): The model.
             X (np.ndarray): Features. (N, D)
+            y (np.ndarray): Labels. (N, )
         
         Returns:
-            y_pred (np.ndarray): Predicted labels. (N, )
+            loss (float): Cross entropy.
         """
+        # simple check
         # simple check
         assert len(X.shape) == 2, \
             "X should be 2D."
+        assert y.shape == (X.shape[0], ), \
+            "y should be 1D and the length equals to X."
 
-        y_pred = model.predict_proba(X)
-        return y_pred
-
-    @classmethod
-    def precision(cls,
-                  y_true: np.ndarray,
-                  y_pred: np.ndarray):
-        """Calculate the precision.
+        y_prob = model.predict_proba(X) # (N, C)
         
-        Args:
-            y_true (np.ndarray): True labels. (N, )
-            y_pred (np.ndarray): Predicted labels. (N, )
-        
-        Returns:
-            precision (float): The precision.
-        """
-        # simple check
-        assert y_true.shape == y_pred.shape == (y_true.shape[0], ), \
-            "y_true and y_pred should have the same shape."
-
-        precision = np.sum(y_true == y_pred) / y_true.shape[0]
-        return precision
+        # calculate the loss
+        loss = 0
+        for i in range(y_prob.shape[0]):
+            loss -= np.log(y_prob[i, y[i]])
+        loss /= y_prob.shape[0]
+        return loss
 
 
 if __name__ == "__main__":
@@ -127,10 +118,6 @@ if __name__ == "__main__":
     y_pred = ModelUtils.predict(model, X_train)
     print(y_pred.shape)
     print(y_pred[:10])
-    # precict proba
-    y_pred_proba = ModelUtils.predict_proba(model, X_train)
-    print(y_pred_proba.shape)
-    print(y_pred_proba[0, :10])
-    # precision
-    precision = ModelUtils.precision(y_train, y_pred)
-    print(precision)
+    # calculate the loss
+    loss = ModelUtils.cross_entropy(model, X_train, y_train)
+    print(loss)
