@@ -1,5 +1,6 @@
 import os
 import argparse
+import pandas as pd
 
 # import internal libs
 from utils.data import DataUtils
@@ -27,6 +28,8 @@ def add_args() -> argparse.Namespace:
                         help='the evaluation method.')
     parser.add_argument("-k", "--n_splits", default=5, type=int,
                         help='the number of splits.')
+    parser.add_argument("-p", "--predict", action="store_true",
+                        help='if True, predict the test data.')
     args = parser.parse_args()
 
     if not os.path.exists(args.save_root):
@@ -37,7 +40,7 @@ def add_args() -> argparse.Namespace:
                          f"seed{args.seed}",
                          f"{args.model}",
                          f"{args.method}",
-                         f"n_splits{args.n_splits}"])
+                         f"n_splits{args.n_splits}",])
     args.save_path = os.path.join(args.save_root, exp_name)
     if not os.path.exists(args.save_path):
         os.makedirs(args.save_path)
@@ -79,13 +82,13 @@ def main():
     logger.info("#########training and eval model....")
     tracker = MetricTracker()
     for i, split in enumerate(splits):
-        X_train, y_train, X_val, y_val = \
+        X_train_split, y_train_split, X_val, y_val = \
             split["X_train"], split["y_train"], split["X_val"], split["y_val"]
 
         # init the model
         model = ModelUtils.auto(args.model)
         # train the model
-        model = ModelUtils.train(model, X_train, y_train)
+        model = ModelUtils.train(model, X_train_split, y_train_split)
 
         # evaluate the model
         val_loss = ModelUtils.cross_entropy(model, X_val, y_val)
@@ -99,6 +102,25 @@ def main():
     
     # save the tracker
     tracker.save_to_csv(os.path.join(args.save_path, "loss.csv"))
+
+    # predict the test data
+    if args.predict:
+        logger.info("#########predicting test data....")
+        # init the model
+        model = ModelUtils.auto(args.model)
+        # train the model
+        model = ModelUtils.train(model, X_train, y_train)
+
+        X_test, _ = DataUtils.load(train=False)
+        y_pred = ModelUtils.predict(model, X_test)
+
+        # save the prediction
+        pred_dict = {
+            "Id": list(range(len(y_pred))),
+            "Category": y_pred.tolist(),
+        }
+        pd.DataFrame(pred_dict).to_csv(
+            os.path.join(args.save_path, "pred.csv"), index=False)
 
 
 if __name__ == "__main__":
