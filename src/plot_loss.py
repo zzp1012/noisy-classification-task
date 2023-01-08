@@ -49,7 +49,7 @@ def main():
                     key = root[start:end]
                 elif model_name == "svm":
                     start, end = re.search(r"svm/[a-z]+", root).span()
-                    key = root[start+4:end-1]
+                    key = root[start+4:end]
                 else:
                     raise NotImplementedError
                 
