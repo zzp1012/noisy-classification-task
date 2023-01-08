@@ -87,7 +87,7 @@ def main():
             split["X_train"], split["y_train"], split["X_val"], split["y_val"]
 
         # init the model
-        model = ModelUtils.auto("svm", kernel=args.kernel)
+        model = ModelUtils.auto("svm", kernel=args.kernel, degree=3, C=0.5)
         # train the model
         model = ModelUtils.train(model, X_train_split, y_train_split)
 
@@ -108,7 +108,7 @@ def main():
     if args.predict:
         logger.info("#########predicting test data....")
         # init the model
-        model = ModelUtils.auto("svm", kernel=args.kernel)
+        model = ModelUtils.auto("svm", kernel=args.kernel, degree=3, C=0.5)
         # train the model
         model = ModelUtils.train(model, X_train, y_train)
 
